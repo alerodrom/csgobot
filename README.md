@@ -1,1 +1,1 @@
-# csgobot
+A simple bot for a group of Counter Strike: Global Offensive on Telegram
