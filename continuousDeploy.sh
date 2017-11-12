@@ -1,6 +1,6 @@
 #!/bin/bash
 
-docker run -d --name $ENV_NAME-$BRANCH-python \
+docker run -d --name csgobot-python \
     -v /home/pomosoft-user/csgobot:/myapp \
         --restart=always \
     --expose=8000 \
