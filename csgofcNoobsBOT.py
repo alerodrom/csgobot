@@ -25,7 +25,6 @@ def command_info(m):
     mensaje = infile.read()
     infile.close()
     bot.send_message(cid, str(mensaje), parse_mode='Markdown')
-    print("Enviando info...")
 
 
 ############################################
@@ -43,7 +42,6 @@ def listener(messages):
             f = open('log.txt', 'a')
             f.write(mensaje + "\n")
             f.close()
-            print(mensaje)
         elif m.content_type == 'new_chat_participant':
             bot.send_message(cid, 'Bienvenido ' + str(m.chat.first_name))
             command_info(m)
