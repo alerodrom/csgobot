@@ -28,6 +28,16 @@ def command_info(m):
     print("Enviando info...")
 
 
+<<<<<<< HEAD
+=======
+def command_ruleta(m):
+    cid = m.chat.id
+    uid = m.from.id
+    bot.send_message(cid, "😵💥🔫 BAAANG", "", $messageID);
+    bot.kickChatMember(cid, uid);
+
+ 
+>>>>>>> 6adc4baf0475ce0d398ab7fb58e4137f4984f748
 ############################################
 #                 LISTENER                 #
 ############################################
@@ -67,6 +77,10 @@ def command_start(m):
 def command_z1(m):
     command_info(m)
 
+
+@bot.message_handler(commands=['click'])  
+def command_z2(m):
+    command_ruleta(m) 
 
 ############################################
 #                 POLLING                  #
