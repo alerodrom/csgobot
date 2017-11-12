@@ -3,9 +3,6 @@
 docker run -d --name csgobot-python \
     -v /home/pomosoft-user/csgobot:/myapp \
         --restart=always \
-    --expose=8000 \
+    --expose=5000 \
     gurken2108/python3-java \
-    bash -c "
-    echo 'Instalando requirements' && \
-    pip install -r requirements.txt && \
-    python csgofcNoobsBOT.py "
+    bash -c "echo 'Europe/Madrid' > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata"
