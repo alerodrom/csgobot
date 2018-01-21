@@ -8,5 +8,4 @@ docker run -d --name csgobot-python \
     gurken2108/python3-java
     bash -c "
     echo 'Instalando requirements' && \
-    pip install -r requirements.txt && \
-    bash runBOT.sh"
+    pip install -r requirements.txt"
