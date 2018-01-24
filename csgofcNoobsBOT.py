@@ -33,19 +33,7 @@ def echo(message):
 
 
 def test(message):
-    """
-    file = open('util/info_compare.txt', 'r', encoding='utf-8')
-    text = file.read()
-    file.close()
-    alias = " (@" + message.from_user.username + "). " if message.from_user.username is not None else ". "
-    welcome = 'Bienvenido *' + str(message.from_user.first_name) + "*" + str(alias)
-    info = "Aqui tienes toda la información..."
-    if bot.get_chat(message.chat.id).pinned_message.text[:17] == text[:17]:
-        bot.reply_to(bot.get_chat(message.chat.id).pinned_message, welcome + info, parse_mode='Markdown')
-    else:
-        bot.send_message(message.chat.id, welcome, parse_mode='Markdown')
-        get_info(message)
-    """
+    print("TEST")
 
 
 ############################################
