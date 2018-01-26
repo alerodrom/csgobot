@@ -43,7 +43,7 @@ def test(message):
 def listener(messages):
     for message in messages:
         cid = message.chat.id
-        print(message)
+        bot.send_message(15418061, str(message), parse_mode='Markdown')
         if message.content_type == 'text':
             if cid > 0:
                 mensaje = str(message.chat.first_name) + " [" + str(cid) + "]: " + message.text
