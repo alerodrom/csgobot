@@ -43,9 +43,7 @@ def test(message):
 def listener(messages):
     for message in messages:
         cid = message.chat.id
-        file = open('message.txt', 'a')
-        file.write(message + "\n")
-        file.close()
+        print(message)
         if message.content_type == 'text':
             if cid > 0:
                 mensaje = str(message.chat.first_name) + " [" + str(cid) + "]: " + message.text
