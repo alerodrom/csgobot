@@ -43,7 +43,7 @@ def test(message):
 def listener(messages):
     for message in messages:
         cid = message.chat.id
-        file = open('message.txt')
+        file = open('message.txt', 'a')
         file.write(message + "\n")
         file.close()
         if message.content_type == 'text':
