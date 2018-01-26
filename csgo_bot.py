@@ -1,3 +1,4 @@
+# import pdb
 import sys
 from importlib import reload
 
@@ -42,9 +43,8 @@ def test(message):
 
 def listener(messages):
     for message in messages:
-        cid = message.chat.id
-        bot.send_message(15418061, str(message), parse_mode='Markdown')
         if message.content_type == 'text':
+            cid = message.chat.id
             if cid > 0:
                 mensaje = str(message.chat.first_name) + " [" + str(cid) + "]: " + message.text
             else:
@@ -53,12 +53,9 @@ def listener(messages):
             f.write(mensaje + "\n")
             f.close()
         elif message.content_type == 'new_chat_members':
-            alias = " (@" + message.from_user.username + "). " if message.from_user.username is not None else ". "
-            welcome = 'Bienvenido *' + str(message.from_user.first_name) + "*" + str(alias)
-            info = "Aqui tienes toda la información..."
-            if bot.get_chat(message.chat.id).pinned_message.text[:17] == '🎮 CS:GO FC NOOBS':
-                bot.reply_to(bot.get_chat(message.chat.id).pinned_message, welcome + info, parse_mode='Markdown')
-            else:
+            for user in message.new_chat_members:
+                alias = " (@" + user.username + "). " if user.username is not None else ". "
+                welcome = 'Bienvenido *' + str(user.first_name) + "*" + str(alias)
                 bot.send_message(message.chat.id, welcome, parse_mode='Markdown')
                 get_info(message)
 
@@ -97,4 +94,4 @@ def command_reply_to_pinned(m):
 ############################################
 
 bot.skip_pending = True
-bot.polling(none_stop=True)
+bot.polling()
