@@ -4,6 +4,8 @@ from importlib import reload
 
 import telebot
 
+from db_helper import DBHelper
+
 ############################################
 #                 DATOS                    #
 ############################################
@@ -12,6 +14,13 @@ reload(sys)
 TOKEN = '309560265:AAHBh78UeZkJPwUudgnC0KIunq3lp8Z8XZI'
 
 bot = telebot.TeleBot(TOKEN)
+
+db = DBHelper()
+db.setup()
+
+# test -1001280311618
+# CSGO -1001107551770
+GROUP_ID = -1001280311618
 
 
 ############################################
@@ -31,6 +40,52 @@ def echo(message):
     chat_id = message.chat.id
     text = "Hola " + message.from_user.first_name + " has puesto: " + message.text[6:]
     bot.send_message(chat_id, str(text), parse_mode='Markdown')
+
+
+def create_mix(message):
+    chat_id = message.chat.id
+    user = message.from_user
+    if chat_id == GROUP_ID:
+        msg = db.create_mix()
+        bot.send_message(chat_id, msg)
+    else:
+        message = "Este comando solo esta disponible para el grupo de CSGO:NOOBS"
+        bot.send_message(chat_id, message)
+
+
+def in_mix(message):
+    chat_id = message.chat.id
+    user = message.from_user
+    if chat_id == GROUP_ID:
+        alias = "@" + user.username if user.username is not None else user.first_name
+        print(user.id)
+        db.add_item(str(user.id), str(user.first_name), alias)
+        bot.send_message(chat_id, 'Te has añadido correctamente')
+    else:
+        message = "Este comando solo esta disponible para el grupo de CSGO:NOOBS"
+        bot.send_message(chat_id, message)
+
+
+def out_mix(message):
+    chat_id = message.chat.id
+    user = message.from_user
+    if chat_id == GROUP_ID:
+        alias = "@" + user.username if user.username is not None else user.first_name
+        db.delete_item(str(alias), str(user.first_name))
+        bot.send_message(chat_id, 'Te has eliminado correctamente')
+    else:
+        message = "Este comando solo esta disponible para el grupo de CSGO:NOOBS"
+        bot.send_message(chat_id, message)
+
+
+def list_mix(message):
+    chat_id = message.chat.id
+    if chat_id == GROUP_ID:
+        items = db.get_items()
+        bot.send_message(chat_id, items, parse_mode='Markdown')
+    else:
+        message = "Este comando solo esta disponible para el grupo de CSGO:NOOBS"
+        bot.send_message(chat_id, message)
 
 
 def test(message):
@@ -87,6 +142,28 @@ def command_echo(m):
 @bot.message_handler(commands=['test'])
 def command_reply_to_pinned(m):
     test(m)
+
+
+@bot.message_handler(commands=['create_mix'])
+def command_create_mix(m):
+    create_mix(m)
+
+
+@bot.message_handler(commands=['in'])
+def command_in_mix(m):
+    in_mix(m)
+    list_mix(m)
+
+
+@bot.message_handler(commands=['out'])
+def command_out_mix(m):
+    out_mix(m)
+    list_mix(m)
+
+
+@bot.message_handler(commands=['list'])
+def command_list_mix(m):
+    list_mix(m)
 
 
 ############################################
