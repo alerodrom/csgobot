@@ -9,7 +9,7 @@ class DBHelper:
 
     def setup(self):
         stmt_user = "CREATE TABLE IF NOT EXISTS user_telegram (id INTEGER PRIMARY KEY AUTOINCREMENT, id_telegram TEXT, first_name TEXT, alias TEXT, UNIQUE(id_telegram))"
-        stmt_mix = "CREATE TABLE IF NOT EXISTS mix (id INTEGER PRIMARY KEY AUTOINCREMENT, mix_date DATE DEFAULT CURRENT_TIMESTAMP, UNIQUE(mix_date))"
+        stmt_mix = "CREATE TABLE IF NOT EXISTS mix (id INTEGER PRIMARY KEY AUTOINCREMENT, mix_date DATE DEFAULT CURRENT_TIMESTAMP, description TEXT, UNIQUE(mix_date))"
         stmt_mix_user = "CREATE TABLE IF NOT EXISTS mix_user (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, mix_id INTEGER NOT NULL, FOREIGN KEY(mix_id) REFERENCES mix(id), FOREIGN KEY(user_id) REFERENCES user_telegram(id), UNIQUE(user_id, mix_id))"
 
         self.conn.execute(stmt_user)
@@ -19,28 +19,42 @@ class DBHelper:
 
     def get_last_mix(self):
         stmt = "SELECT *  FROM mix WHERE   ID = (SELECT MAX(id)  FROM mix)"
-        return self.conn.execute(stmt)
+        res = self.conn.execute(stmt)
+        self.conn.commit()
+        return res
 
-    def get_user_or_create(self, id_telegram, first_name, alias):
-        stmt_user = "SELECT EXISTS(SELECT 1 FROM user_telegram WHERE id_telegram=?)"
+    def mix_exist(self):
+        stmt = "SELECT COUNT(*)  FROM mix"
+        res = True
+        if self.conn.execute(stmt).fetchone()[0] == 0:
+            self.conn.commit()
+            res = False
+        return res
+
+    def user_in_mix(self, user_id, mix_id):
+        stmt = "SELECT COUNT(*)  FROM mix_user WHERE user_id = ? AND mix_id = ? "
+        args = (user_id, mix_id,)
+        res = self.conn.execute(stmt, args).fetchone()[0]
+        self.conn.commit()
+        return res
+
+    def get_user(self, id_telegram):
+        stmt_user = "SELECT * FROM user_telegram WHERE id_telegram=?"
         user = self.conn.execute(stmt_user, (id_telegram,))
-        if user is True:
-            return user
-        else:
-            stmt = "INSERT INTO user_telegram (id_telegram, first_name) VALUES (?, ?)"
-            args = (id_telegram, first_name,)
-            try:
-                user = self.conn.execute(stmt, args)
-                self.conn.commit()
-            except:
-                pass
-            return user
+        self.conn.commit()
+        return user
+
+    def user_create(self, id_telegram, first_name, alias):
+        stmt = "INSERT INTO user_telegram (id_telegram, first_name, alias) VALUES (?, ?, ?)"
+        args = (id_telegram, first_name, alias,)
+        self.conn.execute(stmt, args)
+        return self.conn.commit()
 
     def mix_today(self):
         today = datetime.strptime(datetime.now().strftime("%Y-%m-%d"), "%Y-%m-%d")
         last_mix = self.get_last_mix()
         aux_date = None
-        if last_mix is True:
+        if last_mix:
             for row in last_mix:
                 aux_date = row[1].split(' ')[0]
             last_mix_day = datetime.strptime(aux_date, "%Y-%m-%d")
@@ -51,14 +65,17 @@ class DBHelper:
         else:
             return False
 
-    def create_mix(self):
+    def create_mix(self, description):
         msg = None
-        if self.mix_today():
+        print(self.mix_exist())
+        if not self.mix_exist():
+            stmt = "INSERT INTO mix (description) VALUES (?)"
+        elif self.mix_today():
             msg = 'Ya ha sido creado'
         else:
-            stmt = "INSERT INTO mix (id) VALUES (NULL)"
+            stmt = "INSERT INTO mix (description) VALUES (?)"
         try:
-            self.conn.execute(stmt)
+            self.conn.execute(stmt, (description,))
             self.conn.commit()
             msg = 'Mix creado correctamente'
         except:
@@ -66,41 +83,52 @@ class DBHelper:
         return msg
 
     def add_item(self, id_telegram, first_name, alias):
-        user = self.get_user_or_create(id_telegram, first_name, alias)
-        last_mix = self.get_last_mix()
+        user = self.get_user(id_telegram)
         user_id = None
-        mix_id = None
         for row in user:
             user_id = row[0]
+        if user_id is None:
+            self.user_create(id_telegram, first_name, alias)
+            user = self.get_user(id_telegram)
+            for row in user:
+                user_id = row[0]
+        last_mix = self.get_last_mix()
+        mix_id = None
         for row in last_mix:
             mix_id = row[0]
-
-        stmt = "INSERT INTO mix_user (user_id, mix_id) VALUES (?, ?)"
-        args = (user_id, mix_id,)
-        try:
+        if self.user_in_mix(user_id, mix_id) == 0:
+            stmt = "INSERT INTO mix_user (user_id, mix_id) VALUES (?, ?)"
+            args = (user_id, mix_id,)
             self.conn.execute(stmt, args)
             self.conn.commit()
-        except:
-            pass
 
-    def delete_item(self, alias, first_name):
-        # select user y mix. Ambos deben existir
-        stmt = "DELETE FROM mix_user WHERE user_id = (?) AND mix_id = (?)"
-        args = (alias, first_name,)
-        try:
-            self.conn.execute(stmt, args)
-            self.conn.commit()
-        except:
-            print("No existe")
+    def delete_item(self, id_telegram):
+        last_mix = self.get_last_mix()
+        user = self.get_user(id_telegram)
+        if user:
+            user_id = None
+            mix_id = None
+            for row in user:
+                user_id = row[0]
+            for row in last_mix:
+                mix_id = row[0]
+            if self.user_in_mix(user_id, mix_id) == 1:
+                stmt = "DELETE FROM mix_user WHERE user_id = (?) AND mix_id = (?)"
+                args = (user_id, mix_id,)
+                self.conn.execute(stmt, args)
+                self.conn.commit()
 
     def get_items(self):
         last_mix = self.get_last_mix()
         mix_id = None
+        description = None
         for row in last_mix:
             mix_id = row[0]
-        stmt = "SELECT user_id FROM mix_user WHERE mix_id = (?)"
+            description = row[2]
+        stmt = "Select DISTINCT first_name FROM user_telegram JOIN mix_user ON user_telegram.id = mix_user.user_id AND mix_user.mix_id = (?) ORDER BY mix_user.id ASC"
         list_mix = self.conn.execute(stmt, (mix_id,))
-        res1 = '*MIX ' + str(date.today().strftime("%d/%m/%y")) + '*\n'
+        self.conn.commit()
+        res1 = '*MIX ' + str(date.today().strftime("%d/%m/%y")) + ':* ' + str(description) + '\n'
         res = res1 + '*---------------------*\n'
         cont = 0
         for row in list_mix:
