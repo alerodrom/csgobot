@@ -32,10 +32,10 @@ ADMINS = [6879883, 15418061, 150147251, 258786599]
 
 def custom_group_only(func):
     def func_wrapper(message):
-        if message.chat.id == GROUP_ID:
-            message = ("Este comando solo esta disponible para el grupo de"
-                + "CSGO:NOOBS")
-            bot.send_message(message.chat.id, message)
+        if message.chat.id != GROUP_ID:
+            message_text = ("Este comando solo esta disponible para el grupo "
+                + "de CSGO:NOOBS")
+            bot.send_message(message.chat.id, message_text)
             return
         func(message)
     return func_wrapper
