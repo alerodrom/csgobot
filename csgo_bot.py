@@ -105,8 +105,8 @@ def get_zen(message):
     user_id=#id ZEN
     #bot.send_message(chat_id, message)
     #in_mix(zen)
-    user = bot.get_chat_member(chat_id, user_id)
-    print(user)
+    user = bot.get_chat_member(chat_id, user_id).user
+    #print(user.username)
     if chat_id == GROUP_ID:
         alias = "@" + user.username if user.username is not None else user.first_name
         print(user)
