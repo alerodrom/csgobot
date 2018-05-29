@@ -98,7 +98,7 @@ def test(message):
 
 def get_javigon(message):
     chat_id = message.chat.id
-    bot.send_audio(chat_id=chat_id, audio=open('javigon(by ZEN).ogg', 'rb'))
+    bot.send_audio(chat_id=chat_id, audio=open('javigon_audio.ogg', 'rb'))
 
 def get_zen(message):
     chat_id = message.chat.id
