@@ -128,16 +128,14 @@ class DBHelper:
         stmt = "Select DISTINCT first_name FROM user_telegram JOIN mix_user ON user_telegram.id = mix_user.user_id AND mix_user.mix_id = (?) ORDER BY mix_user.id ASC"
         list_mix = self.conn.execute(stmt, (mix_id,))
         self.conn.commit()
-        res1 = '*MIX ' + str(date.today().strftime("%d/%m/%y")) + ':* ' + str(description) + '\n'
-        res = res1 + '*---------------------*\n'
-        cont = 0
-        for row in list_mix:
-            cont = cont + 1
-            if cont <= 10:
-                res = res + '*' + str(cont) + ".* " + str(row[0]) + "\n"
-            elif cont == 11:
-                res = res + '\n *SUPLENTES* \n' + '*' + str(cont) + ".* " + str(row[0]) + "\n"
-                res = res + '*' + str(cont) + ".* " + str(row[0]) + "\n"
-            elif cont > 11:
-                res = res + '*' + str(cont) + ".* " + str(row[0]) + "\n"
+        res = ('*MIX ' + str(date.today().strftime("%d/%m/%y")) + ':* '
+            + str(description) + '\n' + '*---------------------*\n')
+        mix_users = list_mix.fetchall()
+        for cont, row in enumerate(mix_users[:10]):
+            res += ('*' + str(cont + 1) + ".* " + str(row[0]) + "\n")
+
+        for cont, row in enumerate(mix_users[10:]):
+            if cont == 0:
+                res += '\n *SUPLENTES* \n'
+            res += '*' + str(cont + 1) + ".* " + str(row[0]) + "\n"
         return res
