@@ -102,15 +102,16 @@ def get_javigon(message):
 
 def get_zen(message):
     chat_id = message.chat.id
-    message = "ZEN esta en la MIX"
-    bot.send_message(chat_id, message)
+    user_id=#id ZEN
+    #bot.send_message(chat_id, message)
     #in_mix(zen)
-    user = 'ZeN88'
+    user = bot.get_chat_member(chat_id, user_id)
+    print(user)
     if chat_id == GROUP_ID:
         alias = "@" + user.username if user.username is not None else user.first_name
-        print(user.id)
+        print(user)
         db.add_item(str(user.id), str(user.first_name), alias)
-        bot.send_message(chat_id, 'Has añadido correctamente a @ZeN88')
+        bot.send_message(chat_id, 'Has aniadido correctamente a @Zen88')
     else:
         message = "Este comando solo esta disponible para el grupo de CSGO:NOOBS"
         bot.send_message(chat_id, message)
