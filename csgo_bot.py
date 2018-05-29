@@ -96,26 +96,6 @@ def list_mix(message):
 def test(message):
     print("TEST")
 
-def get_javigon(message):
-    chat_id = message.chat.id
-    bot.send_audio(chat_id=chat_id, audio=open('javigon_audio.ogg', 'rb'))
-
-def get_zen(message):
-    chat_id = message.chat.id
-    user_id=#id ZEN
-    #bot.send_message(chat_id, message)
-    #in_mix(zen)
-    user = bot.get_chat_member(chat_id, user_id).user
-    #print(user.username)
-    if chat_id == GROUP_ID:
-        alias = "@" + user.username if user.username is not None else user.first_name
-        print(user)
-        db.add_item(str(user.id), str(user.first_name), alias)
-        bot.send_message(chat_id, 'Has aniadido correctamente a @Zen88')
-    else:
-        message = "Este comando solo esta disponible para el grupo de CSGO:NOOBS"
-        bot.send_message(chat_id, message)
-
 ############################################
 #                 LISTENER                 #
 ############################################
