@@ -10,7 +10,7 @@ from telebot import types
 ############################################
 reload(sys)
 
-TOKEN = '526852229:AAFe-wyzOBxXYD3PxEJCvt_vwPlDurLvcxs' #os.environ.get('csgo_bot_token')
+TOKEN =os.environ.get('csgo_bot_token')
 
 bot = telebot.TeleBot(TOKEN)
 
