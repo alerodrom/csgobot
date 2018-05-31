@@ -154,13 +154,11 @@ def get_pollon(message):
 	chat_id = message.chat.id
 	if evitar_flood_javigon:#evita el flood
 		try:
-			bot.delete_message(
-			   message.chat.id, 
-			   message.message_id-1)#elimina los mensajes para evitar flood
+			bot.delete_message(message.chat.id, 
+			                   message.message_id-1)#elimina los mensajes para evitar flood
 			
-			bot.delete_message(
-			   message.chat.id, 
-			   message.message_id)
+			bot.delete_message(message.chat.id, 
+			                   message.message_id)
 
 		except(Exception, ArithmeticError) as e:
 			
