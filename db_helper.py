@@ -72,9 +72,11 @@ class DBHelper:
             User.admin == 1).all()
 
     def user_create(self, id_telegram, first_name, alias):
-        self.session.add(User(id_telegram=id_telegram, first_name=first_name,
-                alias=alias))
-        return self.session.commit()
+        user = User(id_telegram=id_telegram, first_name=first_name,
+            alias=alias)
+        self.session.add(user)
+        self.session.commit()
+        return user
 
     def mix_today(self):
         today = date.today()
@@ -127,14 +129,26 @@ class DBHelper:
         mix_users = self.session.query(User).join(
             MixUser, MixUser.user_id == User.id).filter(
                 MixUser.mix_id == last_mix.id).all()
+        return mix_users
 
-        res = ('*MIX ' + str(date.today().strftime("%d/%m/%y")) + ':* '
-            + str(last_mix.description) + '\n' + '*---------------------*\n')
-        for cont, user in enumerate(mix_users[:10]):
-            res += ('*' + str(cont + 1) + ".* " + user.first_name + "\n")
+    def set_admin(self, telegram_user):
+        alias = ("@" + telegram_user.username
+            if telegram_user.username else telegram_user.first_name)
+        user = self.session.query(User).filter(
+            User.id_telegram == telegram_user.id).first()
+        if not user:
+            user = self.user_create(telegram_user.id, telegram_user.first_name,
+                alias)
+        user.admin = 1
+        return self.session.commit()
 
-        for cont, user in enumerate(mix_users[10:]):
-            if cont == 0:
-                res += '\n *SUPLENTES* \n'
-            res += '*' + str(cont + 1) + ".* " + user.first_name + "\n"
-        return res
+    def revoke_admin(self, telegram_user):
+        alias = ("@" + telegram_user.username
+            if telegram_user.username else telegram_user.first_name)
+        user = self.session.query(User).filter(
+            User.id_telegram == telegram_user.id).first()
+        if not user:
+            user = self.user_create(telegram_user.id, telegram_user.first_name,
+                alias)
+        user.admin = 0
+        return self.session.commit()

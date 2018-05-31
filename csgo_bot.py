@@ -1,7 +1,10 @@
 # import pdb
 import sys
 import os
+import getopt
+
 from importlib import reload
+from datetime import date
 
 import telebot
 
@@ -23,7 +26,14 @@ db.setup()
 # CSGO -1001107551770
 GROUP_ID = -1001107551770
 
-ADMINS = [u.telegram_id for u in db.get_admins()]
+myotps, _ = getopt.getopt(sys.argv[1:], "a:")
+
+try:
+    SUPER_ADMIN = myotps[0][1] or None
+except IndexError:
+    SUPER_ADMIN = None
+
+ADMINS = [u.id_telegram for u in db.get_admins()]
 
 ############################################
 #                 DECORATORS               #
@@ -50,6 +60,35 @@ def is_admin(func):
     return func_wrapper
 
 
+def personal_chat_only(func):
+    def func_wrapper(message):
+        if str(message.chat.id).startswith('-'):
+            message_text = ("Este comando solo puede usarse en privado.")
+            bot.send_message(message.chat.id, message_text)
+            return
+        func(message)
+    return func_wrapper
+
+
+def superadmin_only(func):
+    def func_wrapper(message):
+        if str(message.from_user.id) not in SUPER_ADMIN:
+            message_text = ("Este comando solo puede usarlo un superadmin.")
+            bot.send_message(message.chat.id, message_text)
+            return
+        func(message)
+    return func_wrapper
+
+
+def with_mix(func):
+    def func_wrapper(message):
+        if not db.get_last_mix():
+            bot.send_message(message.chat.id,
+                'Todavía no hay ninguna mix creada hoy.')
+            return
+        func(message)
+    return func_wrapper
+
 ############################################
 #                 FUNCIONES                #
 ############################################
@@ -69,7 +108,7 @@ def echo(message):
     bot.send_message(chat_id, str(text), parse_mode='Markdown')
 
 
-@custom_group_only
+# @custom_group_only
 @is_admin
 def create_mix(message):
     chat_id = message.chat.id
@@ -78,12 +117,12 @@ def create_mix(message):
 
 
 @custom_group_only
+@with_mix
 def in_mix(message):
     user = message.from_user
     alias = "@" + user.username if user.username else user.first_name
-    result = db.add_item(str(user.id), str(user.first_name), alias)
-    msg = ('Te has añadido correctamente ' + str(alias) if result
-        else 'No hay mix creada o ya te has unido a la mix')
+    db.add_item(str(user.id), str(user.first_name), alias)
+    msg = 'Te has añadido correctamente ' + str(alias)
     bot.reply_to(message, msg)
 
 
@@ -93,14 +132,53 @@ def out_mix(message):
     alias = "@" + user.username if user.username else user.first_name
     db.delete_item(str(user.id))
     msg = 'Te has eliminado correctamente ' + str(alias)
+    mix_users = db.get_items()
+    if len(mix_users) >= 10:
+        msg += '\n' + str(mix_users[9].alias) + ' Ha pasado al diez titular.'
     bot.reply_to(message, msg)
 
 
-@custom_group_only
+# @custom_group_only
+@with_mix
 def list_mix(message):
     chat_id = message.chat.id
-    items = db.get_items()
-    bot.send_message(chat_id, items, parse_mode='Markdown')
+    mix_users = db.get_items()
+    last_mix = db.get_last_mix()
+    res = ('*MIX ' + str(date.today().strftime("%d/%m/%y")) + ':* '
+        + str(last_mix.description) + '\n' + '*---------------------*\n')
+    for cont, user in enumerate(mix_users[:10]):
+        res += ('*' + str(cont + 1) + ".* " + user.first_name + "\n")
+
+    for cont, user in enumerate(mix_users[10:]):
+        if cont == 0:
+            res += '\n *SUPLENTES* \n'
+        res += '*' + str(cont + 1) + ".* " + user.first_name + "\n"
+    bot.send_message(chat_id, res, parse_mode='Markdown')
+
+
+@personal_chat_only
+@superadmin_only
+def set_admin(message):
+    chat_id = message.chat.id
+    db.set_admin(message.from_user)
+    bot.send_message(chat_id, 'Admin added.')
+
+
+@personal_chat_only
+@superadmin_only
+def revoke_admin(message):
+    chat_id = message.chat.id
+    db.revoke_admin(message.from_user.id)
+    bot.send_message(chat_id, 'Admin revoked.')
+
+
+@superadmin_only
+def get_admins(message):
+    chat_id = message.chat.id
+    admin_list = "*Admins*\n"
+    for admin in db.get_admins():
+        admin_list += "- %s | %s\n" % (admin.first_name, admin.alias)
+    bot.send_message(chat_id, admin_list, parse_mode='Markdown')
 
 
 ############################################
@@ -169,6 +247,20 @@ def command_out_mix(m):
 def command_list_mix(m):
     list_mix(m)
 
+
+@bot.message_handler(commands=['set_admin'])
+def command_set_admin(m):
+    set_admin(m)
+
+
+@bot.message_handler(commands=['revoke_admin'])
+def command_revoke_admin(m):
+    revoke_admin(m)
+
+
+@bot.message_handler(commands=['get_admins'])
+def command_get_admins(m):
+    get_admins(m)
 
 ############################################
 #                 POLLING                  #
