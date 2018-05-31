@@ -1,18 +1,16 @@
-# import pdb
+﻿# import pdb
 import sys
 import os
 from importlib import reload
-
 import telebot
-
 from db_helper import DBHelper
-
+from telebot import types
 ############################################
 #                 DATOS                    #
 ############################################
 reload(sys)
 
-TOKEN = os.environ.get('csgo_bot_token')
+TOKEN = '526852229:AAFe-wyzOBxXYD3PxEJCvt_vwPlDurLvcxs' #os.environ.get('csgo_bot_token')
 
 bot = telebot.TeleBot(TOKEN)
 
@@ -21,7 +19,7 @@ db.setup()
 
 # test -1001280311618
 # CSGO -1001107551770
-GROUP_ID = -1001107551770
+GROUP_ID = -319789223
 
 ADMINS = [6879883, 15418061, 150147251, 258786599, 1346477, 264856075, 39284761, 2622857]
 
@@ -102,6 +100,37 @@ def list_mix(message):
     items = db.get_items()
     bot.send_message(chat_id, items, parse_mode='Markdown')
 
+    
+	
+	
+@custom_group_only
+def get_javigon(message):
+	chat_id = message.chat.id
+	markup = types.ReplyKeyboardMarkup(row_width=2)
+	itembtn1 = types.KeyboardButton('/sinDuda')
+	itembtn2 = types.KeyboardButton('/pollon')
+	markup.add(itembtn1, itembtn2)
+	bot.send_message(chat_id, "Elige tu audio:", reply_markup=markup)
+	
+	
+@custom_group_only
+def get_sinDuda(message):
+	chat_id = message.chat.id
+	#print("eliminando teclado")	
+	markup = types.ReplyKeyboardRemove(selective=False)
+	bot.send_message(chat_id, "ok reproduciendo sinDuda", reply_markup=markup)
+	bot.send_audio(chat_id=chat_id, audio=open('javigon_sinDuda_audio.ogg', 'rb'))
+
+@custom_group_only
+def get_pollon(message):
+	chat_id = message.chat.id
+	#print("eliminando teclado")	
+	markup = types.ReplyKeyboardRemove(selective=False)
+	bot.send_message(chat_id, "ok reproduciendo pollon", reply_markup=markup)
+	bot.send_audio(chat_id=chat_id, audio=open('javigon_pollon_audio.ogg', 'rb'))
+
+
+
 
 ############################################
 #                 LISTENER                 #
@@ -168,7 +197,22 @@ def command_out_mix(m):
 @bot.message_handler(commands=['list'])
 def command_list_mix(m):
     list_mix(m)
+	
+	
+	
+	
+@bot.message_handler(commands=['javigon'])
+def command_javigon(m):
+    get_javigon(m)
 
+@bot.message_handler(commands=['sinDuda'])
+def command_sinDuda(m):
+    get_sinDuda(m)
+
+	
+@bot.message_handler(commands=['pollon'])
+def command_pollon(m):
+    get_pollon(m)
 
 ############################################
 #                 POLLING                  #
