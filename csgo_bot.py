@@ -13,7 +13,7 @@ reload(sys)
 TOKEN = '526852229:AAFe-wyzOBxXYD3PxEJCvt_vwPlDurLvcxs' #os.environ.get('csgo_bot_token')
 
 bot = telebot.TeleBot(TOKEN)
-
+evitar_flood_javigon=True #It avoids flooding with commands , True to activate(default False)
 db = DBHelper()
 db.setup()
 
@@ -113,35 +113,57 @@ def get_javigon(message):
 		markup.add(itembtn1, itembtn2)
 		bot.send_message(chat_id, "Elige tu audio:", reply_markup=markup)
 		
+		
 	except:
 		print("Oops!Try again...")
 	
 	
+	#bot.delete_message(message.chat.id, message.message_id + 1)
+	
+	
 @custom_group_only
 def get_sinDuda(message):
+	chat_id = message.chat.id
+	if evitar_flood_javigon:#evita el flood
+		try:
+			bot.delete_message(message.chat.id, message.message_id-1)#elimina los mensajes para evitar flood
+			bot.delete_message(message.chat.id, message.message_id)
+
+		except(Exception, ArithmeticError) as e:
+			
+			bot.send_message(chat_id, "Oops! No soy ADMIN?,El antiflood requiere que sea admin.")				
+	
 	try:
-		chat_id = message.chat.id
-		#print("eliminando teclado")	
-		markup = types.ReplyKeyboardRemove(selective=False)
-		bot.send_message(chat_id, "ok reproduciendo sinDuda", reply_markup=markup)
+		markup = types.ReplyKeyboardRemove(selective=False)#elimina tecjado de pantalla
 		bot.send_audio(chat_id=chat_id, audio=open('javigon_sinDuda_audio.ogg', 'rb'))
 		bot.send_message(chat_id, "ok reproduciendo sinDuda", reply_markup=markup)
 	except(Exception, ArithmeticError) as e:
 		print("Oops! Archivo javigon_sinDuda_audio.ogg not found.")
-		bot.send_message(chat_id, "Audio no encontrado, contacta con Admin", reply_markup=markup)
+		bot.send_message(chat_id, "Audio no encontrado, contacta con Admin")
 
 
 @custom_group_only
 def get_pollon(message):
+	chat_id = message.chat.id
+	if evitar_flood_javigon:#evita el flood
+		try:
+			bot.delete_message(message.chat.id, message.message_id-1)#elimina los mensajes para evitar flood
+			bot.delete_message(message.chat.id, message.message_id)
+
+		except(Exception, ArithmeticError) as e:
+			
+			bot.send_message(chat_id, "Oops! No soy ADMIN?,El antiflood requiere que sea admin.")				
+	
+	
 	try:
-		chat_id = message.chat.id
-		#print("eliminando teclado")	
-		markup = types.ReplyKeyboardRemove(selective=False)
+		markup = types.ReplyKeyboardRemove(selective=False)#elimina tecjado de pantalla
 		bot.send_audio(chat_id=chat_id, audio=open('javigon_pollon_audio.ogg', 'rb'))
 		bot.send_message(chat_id, "ok reproduciendo pollon", reply_markup=markup)
 	except(Exception, ArithmeticError) as e:
 		print("Oops! Archivo javigon_pollon_audio.ogg not found.")
 		bot.send_message(chat_id, "Audio no encontrado, contacta con Admin", reply_markup=markup)
+	
+	
 
 
 
