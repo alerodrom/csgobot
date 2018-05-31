@@ -23,7 +23,7 @@ db.setup()
 # CSGO -1001107551770
 GROUP_ID = -1001107551770
 
-ADMINS = [6879883, 15418061, 150147251, 258786599, 1346477, 264856075, 39284761, 2622857]
+ADMINS = [u.telegram_id for u in db.get_admins()]
 
 ############################################
 #                 DECORATORS               #
@@ -45,6 +45,7 @@ def is_admin(func):
     def func_wrapper(message):
         if message.from_user.id not in ADMINS:
             bot.send_message(message.chat.id, "No eres admin.")
+            return
         func(message)
     return func_wrapper
 
@@ -78,22 +79,21 @@ def create_mix(message):
 
 @custom_group_only
 def in_mix(message):
-    chat_id = message.chat.id
     user = message.from_user
     alias = "@" + user.username if user.username else user.first_name
-    db.add_item(str(user.id), str(user.first_name), alias)
-    msg = 'Te has añadido correctamente ' + str(alias)
-    bot.send_message(chat_id, msg)
+    result = db.add_item(str(user.id), str(user.first_name), alias)
+    msg = ('Te has añadido correctamente ' + str(alias) if result
+        else 'No hay mix creada o ya te has unido a la mix')
+    bot.reply_to(message, msg)
 
 
 @custom_group_only
 def out_mix(message):
-    chat_id = message.chat.id
     user = message.from_user
     alias = "@" + user.username if user.username else user.first_name
     db.delete_item(str(user.id))
     msg = 'Te has eliminado correctamente ' + str(alias)
-    bot.send_message(chat_id, msg)
+    bot.reply_to(message, msg)
 
 
 @custom_group_only
