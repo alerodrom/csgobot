@@ -2,7 +2,7 @@
 
 while true
 do
-python3 csgofcNoobsBOT.py
+python3 csgo_bot.py
 echo "¡The bot is crashed!"
 echo "Rebooting in:"
 for i in 1
