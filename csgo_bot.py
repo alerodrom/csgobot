@@ -135,7 +135,7 @@ def get_sinDuda(message):
 					"antiflood requiere que sea admin.")				
 	
 	try:
-		markup = types.ReplyKeyboardRemove(selective=False)#elimina tecjado de pantalla
+		markup = types.ReplyKeyboardRemove(selective=False)#elimina teclado de pantalla
 		bot.send_audio(chat_id=chat_id,
                 	       audio=open('javigon_sinDuda_audio.ogg',
 			       'rb'))
@@ -167,7 +167,7 @@ def get_pollon(message):
 					"antiflood requiere que sea admin.")				
 	
 	try:
-		markup = types.ReplyKeyboardRemove(selective=False)#elimina tecjado de pantalla
+		markup = types.ReplyKeyboardRemove(selective=False)#elimina teclado de pantalla
 		
 		bot.send_audio(chat_id=chat_id, 
 			       audio=open('javigon_pollon_audio.ogg',
