@@ -9,7 +9,7 @@ from telebot import types
 ############################################
 reload(sys)
 
-TOKEN = '526852229:AAFe-wyzOBxXYD3PxEJCvt_vwPlDurLvcxs' #os.environ.get('csgo_bot_token')
+TOKEN = os.environ.get('csgo_bot_token')
 
 bot = telebot.TeleBot(TOKEN)
 evitar_flood_javigon=True #It avoids flooding with commands , True to activate(default False)
