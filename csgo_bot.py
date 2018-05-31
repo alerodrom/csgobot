@@ -10,7 +10,7 @@ from telebot import types
 ############################################
 reload(sys)
 
-TOKEN =os.environ.get('csgo_bot_token')
+TOKEN = '526852229:AAFe-wyzOBxXYD3PxEJCvt_vwPlDurLvcxs' #os.environ.get('csgo_bot_token')
 
 bot = telebot.TeleBot(TOKEN)
 
@@ -105,29 +105,43 @@ def list_mix(message):
 	
 @custom_group_only
 def get_javigon(message):
-	chat_id = message.chat.id
-	markup = types.ReplyKeyboardMarkup(row_width=2)
-	itembtn1 = types.KeyboardButton('/sinDuda')
-	itembtn2 = types.KeyboardButton('/pollon')
-	markup.add(itembtn1, itembtn2)
-	bot.send_message(chat_id, "Elige tu audio:", reply_markup=markup)
+	try:
+		chat_id = message.chat.id
+		markup = types.ReplyKeyboardMarkup(row_width=2)
+		itembtn1 = types.KeyboardButton('/sinDuda')
+		itembtn2 = types.KeyboardButton('/pollon')
+		markup.add(itembtn1, itembtn2)
+		bot.send_message(chat_id, "Elige tu audio:", reply_markup=markup)
+		
+	except:
+		print("Oops!Try again...")
 	
 	
 @custom_group_only
 def get_sinDuda(message):
-	chat_id = message.chat.id
-	#print("eliminando teclado")	
-	markup = types.ReplyKeyboardRemove(selective=False)
-	bot.send_message(chat_id, "ok reproduciendo sinDuda", reply_markup=markup)
-	bot.send_audio(chat_id=chat_id, audio=open('javigon_sinDuda_audio.ogg', 'rb'))
+	try:
+		chat_id = message.chat.id
+		#print("eliminando teclado")	
+		markup = types.ReplyKeyboardRemove(selective=False)
+		bot.send_message(chat_id, "ok reproduciendo sinDuda", reply_markup=markup)
+		bot.send_audio(chat_id=chat_id, audio=open('javigon_sinDuda_audio.ogg', 'rb'))
+		bot.send_message(chat_id, "ok reproduciendo sinDuda", reply_markup=markup)
+	except(Exception, ArithmeticError) as e:
+		print("Oops! Archivo javigon_sinDuda_audio.ogg not found.")
+		bot.send_message(chat_id, "Audio no encontrado, contacta con Admin", reply_markup=markup)
+
 
 @custom_group_only
 def get_pollon(message):
-	chat_id = message.chat.id
-	#print("eliminando teclado")	
-	markup = types.ReplyKeyboardRemove(selective=False)
-	bot.send_message(chat_id, "ok reproduciendo pollon", reply_markup=markup)
-	bot.send_audio(chat_id=chat_id, audio=open('javigon_pollon_audio.ogg', 'rb'))
+	try:
+		chat_id = message.chat.id
+		#print("eliminando teclado")	
+		markup = types.ReplyKeyboardRemove(selective=False)
+		bot.send_audio(chat_id=chat_id, audio=open('javigon_pollon_audio.ogg', 'rb'))
+		bot.send_message(chat_id, "ok reproduciendo pollon", reply_markup=markup)
+	except(Exception, ArithmeticError) as e:
+		print("Oops! Archivo javigon_pollon_audio.ogg not found.")
+		bot.send_message(chat_id, "Audio no encontrado, contacta con Admin", reply_markup=markup)
 
 
 
@@ -197,8 +211,6 @@ def command_out_mix(m):
 @bot.message_handler(commands=['list'])
 def command_list_mix(m):
     list_mix(m)
-	
-	
 	
 	
 @bot.message_handler(commands=['javigon'])
