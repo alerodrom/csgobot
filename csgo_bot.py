@@ -9,8 +9,8 @@ from telebot import types
 ############################################
 reload(sys)
 
-# os.environ.get('csgo_bot_token')
-TOKEN = '526852229:AAFe-wyzOBxXYD3PxEJCvt_vwPlDurLvcxs'
+
+TOKEN = os.environ.get('csgo_bot_token')
 
 bot = telebot.TeleBot(TOKEN)
 # It avoids flooding with commands , True to activate(default False)
@@ -21,7 +21,7 @@ db.setup()
 # test -1001280311618
 # CSGO -1001107551770
 # test jesus -319789223
-GROUP_ID = -319789223
+GROUP_ID = -1001107551770
 
 ADMINS = [
     6879883,
