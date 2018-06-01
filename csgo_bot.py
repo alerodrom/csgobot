@@ -160,16 +160,30 @@ def list_mix(message):
 @superadmin_only
 def set_admin(message):
     chat_id = message.chat.id
-    db.set_admin(message.from_user)
-    bot.send_message(chat_id, 'Admin added.')
+    text = 'No user specified.'
+    if len(message.text.split(' ')) >= 2:
+        user = db.get_user(message.text.split(' ')[1])
+        if not user:
+            bot.send_message(chat_id, 'User should talk to the bot first.')
+            return
+        db.set_admin(user)
+        text = 'Admin added.'
+    bot.send_message(chat_id, text)
 
 
 @personal_chat_only
 @superadmin_only
 def revoke_admin(message):
     chat_id = message.chat.id
-    db.revoke_admin(message.from_user.id)
-    bot.send_message(chat_id, 'Admin revoked.')
+    text = 'No user specified.'
+    if len(message.text.split(' ')) >= 2:
+        user = db.get_user(message.text.split(' ')[1])
+        if not user:
+            bot.send_message(chat_id, 'User should talk to the bot first.')
+            return
+        db.revoke_admin(user)
+        text = 'Admin revoked.'
+    bot.send_message(chat_id, text)
 
 
 @superadmin_only

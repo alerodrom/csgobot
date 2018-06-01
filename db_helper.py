@@ -131,24 +131,10 @@ class DBHelper:
                 MixUser.mix_id == last_mix.id).all()
         return mix_users
 
-    def set_admin(self, telegram_user):
-        alias = ("@" + telegram_user.username
-            if telegram_user.username else telegram_user.first_name)
-        user = self.session.query(User).filter(
-            User.id_telegram == telegram_user.id).first()
-        if not user:
-            user = self.user_create(telegram_user.id, telegram_user.first_name,
-                alias)
+    def set_admin(self, user):
         user.admin = 1
         return self.session.commit()
 
-    def revoke_admin(self, telegram_user):
-        alias = ("@" + telegram_user.username
-            if telegram_user.username else telegram_user.first_name)
-        user = self.session.query(User).filter(
-            User.id_telegram == telegram_user.id).first()
-        if not user:
-            user = self.user_create(telegram_user.id, telegram_user.first_name,
-                alias)
+    def revoke_admin(self, user):
         user.admin = 0
         return self.session.commit()
