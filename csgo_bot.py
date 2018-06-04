@@ -22,7 +22,6 @@ db.setup()
 
 # test -1001280311618
 # CSGO -1001107551770
-# test jesus -319789223
 GROUP_ID = -1001107551770
 
 myotps, _ = getopt.getopt(sys.argv[1:], "a:")
@@ -31,8 +30,6 @@ try:
     SUPER_ADMIN = myotps[0][1] or None
 except IndexError:
     SUPER_ADMIN = None
-
-ADMINS = [u.id_telegram for u in db.get_admins()]
 
 
 ############################################
@@ -53,7 +50,7 @@ def custom_group_only(func):
 
 def is_admin(func):
     def func_wrapper(message):
-        if message.from_user.id not in ADMINS:
+        if message.from_user.id not in get_admins():
             bot.send_message(message.chat.id, "No eres admin.")
             return
         func(message)
@@ -92,6 +89,10 @@ def with_mix(func):
 ############################################
 #                 FUNCIONES                #
 ############################################
+
+
+def get_admins():
+    return [u.id_telegram for u in db.get_admins()]
 
 
 def get_info(message):
@@ -187,7 +188,7 @@ def revoke_admin(message):
 
 
 @superadmin_only
-def get_admins(message):
+def print_admins(message):
     chat_id = message.chat.id
     admin_list = "*Admins*\n"
     for admin in db.get_admins():
@@ -218,11 +219,10 @@ def get_sinDuda(message):
             bot.delete_message(message.chat.id, message.message_id - 1)
             bot.delete_message(message.chat.id, message.message_id)
 
-        except(Exception, ArithmeticError) as e:
-
+        except(Exception, ArithmeticError):
             bot.send_message(
-                chat_id, "Oops! No soy ADMIN?,El antiflood requiere que sea admin.")
-
+                chat_id,
+                "Oops! No soy ADMIN?,El antiflood requiere que sea admin.")
     try:
         markup = types.ReplyKeyboardRemove(
             selective=False)  # elimina teclado de pantalla
@@ -233,7 +233,7 @@ def get_sinDuda(message):
             chat_id,
             "ok reproduciendo sinDuda",
             reply_markup=markup)
-    except(Exception, ArithmeticError) as e:
+    except(Exception, ArithmeticError):
         print("Oops! Archivo javigon_sinDuda_audio.ogg not found.")
         bot.send_message(chat_id, "Audio no encontrado contacta con Admin")
 
@@ -248,10 +248,10 @@ def get_pollon(message):
 
             bot.delete_message(message.chat.id, message.message_id)
 
-        except(Exception, ArithmeticError) as e:
-
+        except(Exception, ArithmeticError):
             bot.send_message(
-                chat_id, "Oops! No soy ADMIN?,El antiflood requiere que sea admin.")
+                chat_id,
+                "Oops! No soy ADMIN?,El antiflood requiere que sea admin.")
 
     try:
         markup = types.ReplyKeyboardRemove(
@@ -265,7 +265,7 @@ def get_pollon(message):
             "ok reproduciendo pollon",
             reply_markup=markup)
 
-    except(Exception, ArithmeticError) as e:
+    except(Exception, ArithmeticError):
         print("Oops! Archivo javigon_pollon_audio.ogg not found.")
         bot.send_message(
             chat_id,
@@ -351,7 +351,8 @@ def command_revoke_admin(m):
 
 
 @bot.message_handler(commands=['get_admins'])
-def command_get_admins(m):
+def command_print_admins(m):
+    print_admins(m)
 
 
 @bot.message_handler(commands=['javigon'])
