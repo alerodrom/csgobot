@@ -16,7 +16,7 @@ TOKEN = os.environ.get('csgo_bot_token')
 
 bot = telebot.TeleBot(TOKEN)
 # It avoids flooding with commands , True to activate(default False)
-evitar_flood_javigon = True
+evitar_flood_javigon = False
 db = DBHelper()
 db.setup()
 
