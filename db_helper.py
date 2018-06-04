@@ -138,3 +138,14 @@ class DBHelper:
     def revoke_admin(self, user):
         user.admin = 0
         return self.session.commit()
+
+    def get_users(self):
+        return self.session.query(User)
+
+    def add(self, to_add):
+        try:
+            self.session.add(to_add)
+            self.session.commit()
+            return 1
+        except Exception:
+            return 0

@@ -4,7 +4,7 @@ import getopt
 from importlib import reload
 from datetime import date
 import telebot
-from db_helper import DBHelper
+from db_helper import DBHelper, User
 from telebot import types
 ############################################
 #                 DATOS                    #
@@ -86,6 +86,20 @@ def with_mix(func):
         func(message)
     return func_wrapper
 
+
+def is_user(func):
+    def func_wrapper(message):
+        id_telegram = message.from_user.id
+        user = db.get_user(id_telegram)
+        if not user:
+            user = message.from_user
+            alias = "@" + user.username if user.username else user.first_name
+            user = User(id_telegram=str(user.id), alias=alias, first_name=str(user.first_name))
+            db.add(user)
+        func(message)
+    return func_wrapper
+
+
 ############################################
 #                 FUNCIONES                #
 ############################################
@@ -117,6 +131,7 @@ def create_mix(message):
     bot.send_message(chat_id, msg)
 
 
+@is_user
 @custom_group_only
 @with_mix
 def in_mix(message):
@@ -127,6 +142,7 @@ def in_mix(message):
     bot.reply_to(message, msg)
 
 
+@is_user
 @custom_group_only
 def out_mix(message):
     user = message.from_user
@@ -140,6 +156,7 @@ def out_mix(message):
 
 
 # @custom_group_only
+@is_user
 @with_mix
 def list_mix(message):
     chat_id = message.chat.id
@@ -192,8 +209,18 @@ def print_admins(message):
     chat_id = message.chat.id
     admin_list = "*Admins*\n"
     for admin in db.get_admins():
-        admin_list += "- %s | %s\n" % (admin.first_name, admin.alias)
+        admin_list += "- %s | %s | %s\n" % (admin.first_name, admin.alias, str(admin.id_telegram))
     bot.send_message(chat_id, admin_list, parse_mode='Markdown')
+
+
+@personal_chat_only
+@superadmin_only
+def print_users(message):
+    chat_id = message.chat.id
+    users = "*Users*\n"
+    for user in db.get_users():
+        users += "- %s | %s | %s\n" % (user.first_name, user.alias, str(user.id_telegram))
+    bot.send_message(chat_id, users, parse_mode='Markdown')
 
 
 @custom_group_only
@@ -228,7 +255,7 @@ def get_sinDuda(message):
             selective=False)  # elimina teclado de pantalla
         bot.send_audio(
             chat_id=chat_id, audio=open(
-                'javigon_sinDuda_audio.ogg', 'rb'))
+                'files/audio/javigon_sinDuda_audio.ogg', 'rb'))
         bot.send_message(
             chat_id,
             "ok reproduciendo sinDuda",
@@ -259,7 +286,7 @@ def get_pollon(message):
 
         bot.send_audio(
             chat_id=chat_id, audio=open(
-                'javigon_pollon_audio.ogg', 'rb'))
+                'files/audio/javigon_pollon_audio.ogg', 'rb'))
         bot.send_message(
             chat_id,
             "ok reproduciendo pollon",
@@ -354,7 +381,12 @@ def command_revoke_admin(m):
 def command_get_admins(m):
     get_admins(m)
 
-    
+
+@bot.message_handler(commands=['get_users'])
+def command_print_users(m):
+    print_users(m)
+
+
 @bot.message_handler(commands=['javigon'])
 def command_javigon(m):
     get_javigon(m)
