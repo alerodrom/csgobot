@@ -1,29 +1,28 @@
-# import pdb
-import sys
+﻿import sys
 import os
 import getopt
-
 from importlib import reload
 from datetime import date
-
 import telebot
-
 from db_helper import DBHelper
-
+from telebot import types
 ############################################
 #                 DATOS                    #
 ############################################
 reload(sys)
 
+
 TOKEN = os.environ.get('csgo_bot_token')
 
 bot = telebot.TeleBot(TOKEN)
-
+# It avoids flooding with commands , True to activate(default False)
+evitar_flood_javigon = True
 db = DBHelper()
 db.setup()
 
 # test -1001280311618
 # CSGO -1001107551770
+# test jesus -319789223
 GROUP_ID = -1001107551770
 
 myotps, _ = getopt.getopt(sys.argv[1:], "a:")
@@ -35,6 +34,7 @@ except IndexError:
 
 ADMINS = [u.id_telegram for u in db.get_admins()]
 
+
 ############################################
 #                 DECORATORS               #
 ############################################
@@ -44,7 +44,7 @@ def custom_group_only(func):
     def func_wrapper(message):
         if message.chat.id != GROUP_ID:
             message_text = ("Este comando solo esta disponible para el grupo "
-                + "de CSGO:NOOBS")
+                            + "de CSGO:NOOBS")
             bot.send_message(message.chat.id, message_text)
             return
         func(message)
@@ -104,7 +104,7 @@ def get_info(message):
 def echo(message):
     chat_id = message.chat.id
     text = ("Hola " + message.from_user.first_name + " has puesto: "
-        + message.text[6:])
+            + message.text[6:])
     bot.send_message(chat_id, str(text), parse_mode='Markdown')
 
 
@@ -195,6 +195,84 @@ def get_admins(message):
     bot.send_message(chat_id, admin_list, parse_mode='Markdown')
 
 
+@custom_group_only
+def get_javigon(message):
+    try:
+        chat_id = message.chat.id
+        markup = types.ReplyKeyboardMarkup(row_width=2)
+        itembtn1 = types.KeyboardButton('/sinDuda')
+        itembtn2 = types.KeyboardButton('/pollon')
+        markup.add(itembtn1, itembtn2)
+        bot.send_message(chat_id, "Elige tu audio:", reply_markup=markup)
+
+    except BaseException:
+        print("Oops!Try again...")
+
+
+@custom_group_only
+def get_sinDuda(message):
+    chat_id = message.chat.id
+    if evitar_flood_javigon:  # evita el flood
+        try:
+            # elimina los mensajes para evitar flood
+            bot.delete_message(message.chat.id, message.message_id - 1)
+            bot.delete_message(message.chat.id, message.message_id)
+
+        except(Exception, ArithmeticError) as e:
+
+            bot.send_message(
+                chat_id, "Oops! No soy ADMIN?,El antiflood requiere que sea admin.")
+
+    try:
+        markup = types.ReplyKeyboardRemove(
+            selective=False)  # elimina teclado de pantalla
+        bot.send_audio(
+            chat_id=chat_id, audio=open(
+                'javigon_sinDuda_audio.ogg', 'rb'))
+        bot.send_message(
+            chat_id,
+            "ok reproduciendo sinDuda",
+            reply_markup=markup)
+    except(Exception, ArithmeticError) as e:
+        print("Oops! Archivo javigon_sinDuda_audio.ogg not found.")
+        bot.send_message(chat_id, "Audio no encontrado contacta con Admin")
+
+
+@custom_group_only
+def get_pollon(message):
+    chat_id = message.chat.id
+    if evitar_flood_javigon:  # evita el flood
+        try:
+            # elimina los mensajes para evitar flood
+            bot.delete_message(message.chat.id, message.message_id - 1)
+
+            bot.delete_message(message.chat.id, message.message_id)
+
+        except(Exception, ArithmeticError) as e:
+
+            bot.send_message(
+                chat_id, "Oops! No soy ADMIN?,El antiflood requiere que sea admin.")
+
+    try:
+        markup = types.ReplyKeyboardRemove(
+            selective=False)  # elimina teclado de pantalla
+
+        bot.send_audio(
+            chat_id=chat_id, audio=open(
+                'javigon_pollon_audio.ogg', 'rb'))
+        bot.send_message(
+            chat_id,
+            "ok reproduciendo pollon",
+            reply_markup=markup)
+
+    except(Exception, ArithmeticError) as e:
+        print("Oops! Archivo javigon_pollon_audio.ogg not found.")
+        bot.send_message(
+            chat_id,
+            "Audio no encontrado, contacta con Admin",
+            reply_markup=markup)
+
+
 ############################################
 #                 LISTENER                 #
 ############################################
@@ -204,17 +282,17 @@ def listener(messages):
         if message.content_type == 'text':
             cid = message.chat.id
             mensaje = (message.chat.first_name if cid > 0
-                 else message.from_user.first_name)
+                       else message.from_user.first_name)
             mensaje += "[" + str(cid) + "]: " + message.text
             with open('log.txt', 'a') as f:
                 f.write(mensaje + "\n")
         elif message.content_type == 'new_chat_members':
             for user in message.new_chat_members:
                 alias = (" (@" + user.username + "). " if user.username
-                    else ". ")
+                         else ". ")
                 welcome = 'Bienvenido *' + user.first_name + "*" + alias
                 bot.send_message(message.chat.id, welcome,
-                    parse_mode='Markdown')
+                                 parse_mode='Markdown')
                 get_info(message)
 
 
@@ -274,11 +352,26 @@ def command_revoke_admin(m):
 
 @bot.message_handler(commands=['get_admins'])
 def command_get_admins(m):
-    get_admins(m)
+
+
+@bot.message_handler(commands=['javigon'])
+def command_javigon(m):
+    get_javigon(m)
+
+
+@bot.message_handler(commands=['sinDuda'])
+def command_sinDuda(m):
+    get_sinDuda(m)
+
+
+@bot.message_handler(commands=['pollon'])
+def command_pollon(m):
+    get_pollon(m)
 
 ############################################
 #                 POLLING                  #
 ############################################
+
 
 bot.skip_pending = True
 bot.polling()
