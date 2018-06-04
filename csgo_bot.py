@@ -352,7 +352,7 @@ def command_revoke_admin(m):
 
 @bot.message_handler(commands=['get_admins'])
 def command_get_admins(m):
-
+    get_admins(m)
 
 @bot.message_handler(commands=['javigon'])
 def command_javigon(m):
